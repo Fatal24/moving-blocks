@@ -3,6 +3,7 @@ import backend_game
 import socket
 import threading
 import time
+import random
 from helper import send_obj, recv_obj
 import random
 

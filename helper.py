@@ -34,5 +34,3 @@ def recv_obj(conn):
         data += chunk
 
     return pickle.loads(data)
-
-def recieve_tiles

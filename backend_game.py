@@ -1,4 +1,5 @@
 import math
+from copy import deepcopy
 import random
 from typing import Dict, List
 import numpy as np
@@ -8,7 +9,7 @@ MAX_GAME_SIDE_LENGTH = 31
 MIN_GAME_SIDE_LENGTH = 15
 
 class Game:
-    def __init__(self, ips, seed):
+    def __init__(self, ips, seed, ):
         self.ips = ips
         self.seed = seed
         dirn = (seed % 4) +  Direction.NORTH # TODO: change to enum when available (by below)
@@ -22,14 +23,16 @@ class Game:
         self.game[random.randint(2, size // 2 - 2)][random.randint(size // 2 + 2, size - 2)] = Goal(3)
         self.game[random.randint(size // 2 + 2, size - 2)][random.randint(size // 2 + 2, size - 2)] = Goal(4)
 
-        self.boxes = [] 
+        self.boxes = []
+        self.old = []
         self.spawner = Spawner((size // 2, size // 2))
 
         
 
     def move_boxes(self):
+
         if self.boxes:
-            
+            self.spawner.spawn()
 
             temp = []
 
@@ -60,8 +63,12 @@ class Game:
 
                 temp.append(x)
 
+            self.old = self.boxes
+            self.boxes = deepcopy(temp)
+
         else:
             new_box = self.spawner.spawn(True)
+            self.boxes.append(new_box)
 
             
 

@@ -1,5 +1,6 @@
 import enum
 import backend_game
+import backend_helper
 import socket
 import threading
 import time
@@ -39,18 +40,49 @@ threading.Thread(target=recv_loop, args=(sock,), daemon=True).start()
 # Main loop
 client_data = {"name": "Client", "x": 300, "y": 400}
 
+playing = False
+started = False
 
-seed = random.randint(0, 2**32 -1)
-game = backend_game.Game([], seed=seed)
+send.append({"type": "INIT_CONNECTION"})
+game = None
+
+player_number = -1
 
 def get_list_of_tiles():
     return game.game
+
+def place_tile(direction, coords):
+    try:
+        send.append({"type": "TILE_PLACE", "data": {"direction": direction, "coords": coords}})
+        game.game[coords[1]][coords[0]].direction = direction
+    except:
+        print("Invalid placemnet!")
 
 while running:
     # Process any packets that came in
     while received:
         packet = received.pop(0)
+
+        if not started and packet.type == "INIT_GAME_STATE":
+            game = backend_game.Game(packet["data"]["connections"], packet["data"]["seed"])
+            player_number = packet["data"]["player_number"]
+            started = True
+            playing = True
+        
+        elif started and not playing and packet["type"] == "TILE_PLACE":
+            try:
+                for x in packet["data"]:
+                    temp_tile = game.game[x["coords"][1]][x["coords"][0]] 
+                    if type(temp_tile) == backend_helper.Tile:
+                        temp_tile.add_direction(x["direction"])
+            except:
+                print("Failed to parse TILE_PLACE data! line 68")
+
+        else: 
+            print(f"Found unknown packet: {packet}")
+
         print(f"[CLIENT] Got: {packet}")
+
 
     while send:
         try:

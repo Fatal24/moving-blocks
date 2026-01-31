@@ -1,4 +1,5 @@
 import os.path
+
 import pygame
 from enum import Enum
 
@@ -15,6 +16,15 @@ class Direction(Enum):
     SOUTH = 3
     WEST = 4
 
+    def __add__(self, other):
+        if other.value == 0 or self.value + other.value < 5:
+            return self.value + other.value
+        return Direction((self.value + other.value + 1)%5)
+    def __sub__(self, other):
+        if other.value == 0 or self.value - other.value > 0:
+            return self.value - other.value
+        return Direction((self.value - other.value - 1) % 5)
+
 class Box:
     def __init__(self, coords, direction, date):
         self.coords = coords
@@ -22,14 +32,17 @@ class Box:
         self.date = date
         self.img = pygame.image.load(box_path)
 
+
 class Goal:
     def __init__(self, player):
         self.player = player
+        self.score = 0
         self.img = pygame.image.load(goal_path)
 
 class Tile:
     def __init__(self, directions=[], lifespan = 5):
-        self.directions = directions
+        # TODO: REVERT TO directions when we decide to tolerate multiple directions
+        self.directions = [directions[0]]
         if not directions:
             self.direction = Direction.STILL
         else:
@@ -46,8 +59,19 @@ class Tile:
         
         return return_dir
 
-
-    
+    def change_direction(self, direction):
+        pass
+        """if not self.directions:
+            self.directions += direction
+        else:
+            breakflag = False
+            for dirn in self.directions:
+                if (dirn.value + 2) % 4 == self.direction.value:
+                    self.directions.remove(self.direction.value)
+                    breakflag = True
+                    break
+            if not breakflag:
+                self.directions += direction"""
 
 class Spawner:
     def __init__(self, coords, direction=Direction.NORTH, threshold=5):
@@ -55,6 +79,7 @@ class Spawner:
         self.date = 0
         self.spawn_epoch = 0
         self.epoch_threshold = threshold
+        self.coords = coords
         self.img = pygame.image.load(spawner_path)
     
     #return box after initialising
@@ -64,9 +89,9 @@ class Spawner:
         self.spawn_epoch += 1
 
         if force_spawn or self.spawn_epoch == self.epoch_threshold:
-            self.direction = (self.direction + 1) % 4 + Direction.NORTH 
+            self.direction = self.direction + Direction.NORTH
             self.spawn_epoch = 0
-            return Box(coords, self.direction, self.date)
+            return Box(self.coords, self.direction, self.date)
 	
         return None
         

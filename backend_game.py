@@ -21,7 +21,11 @@ class Game:
         game[random.randint(2, size // 2 - 2)][random.randint(size // 2 + 2, size - 2)] = 3
         game[random.randint(size // 2 + 2, size - 2)][random.randint(size // 2 + 2, size - 2)] = 4
 
-         
+        self.boxes = [] 
+
+
+    def move_boxes:
+        
 
 
 # debug: np.set_printoptions(edgeitems=30, linewidth=100000)

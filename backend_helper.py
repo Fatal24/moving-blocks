@@ -1,4 +1,5 @@
 import os.path
+
 import pygame
 from enum import Enum
 
@@ -35,11 +36,13 @@ class Box:
 class Goal:
     def __init__(self, player):
         self.player = player
+        self.score = 0
         self.img = pygame.image.load(goal_path)
 
 class Tile:
     def __init__(self, directions=[], lifespan = 5):
-        self.directions = directions
+        # TODO: REVERT TO directions when we decide to tolerate multiple directions
+        self.directions = [directions[0]]
         if not directions:
             self.direction = Direction.STILL
         else:
@@ -56,8 +59,19 @@ class Tile:
         
         return return_dir
 
-
-    
+    def change_direction(self, direction):
+        pass
+        """if not self.directions:
+            self.directions += direction
+        else:
+            breakflag = False
+            for dirn in self.directions:
+                if (dirn.value + 2) % 4 == self.direction.value:
+                    self.directions.remove(self.direction.value)
+                    breakflag = True
+                    break
+            if not breakflag:
+                self.directions += direction"""
 
 class Spawner:
     def __init__(self, coords, direction=Direction.NORTH, threshold=5):

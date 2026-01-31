@@ -30,19 +30,19 @@ class Goal:
 class Tile:
     def __init__(self, directions=[], lifespan = 5):
         self.directions = directions
-        if directions == []:
-            self.direction = STILL
-	else:
+        if not directions:
+            self.direction = Direction.STILL
+        else:
             self.direction = directions[0]
         self.lifespan = lifespan
         self.i = 0
 
     def get_direction(self):
-        if self.directions == []:
-            return STILL
+        if not self.directions:
+            return Direction.STILL
 
-        return_dir = self.directions[i]
-        i = (i+1) % len(self.directions)
+        return_dir = self.directions[self.i]
+        self.i = (self.i+1) % len(self.directions)
         
         return return_dir
 

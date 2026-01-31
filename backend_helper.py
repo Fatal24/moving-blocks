@@ -69,13 +69,12 @@ class Spawner:
     
     #return box after initialising
     def spawn(self, force_spawn=False):
-        successors = {NORTH : EAST, EAST : SOUTH, SOUTH : WEST, WEST : NORTH}
 
         self.date += 1
         self.spawn_epoch += 1
 
-	if force_spawn or self.spawn_epoch == self.epoch_threshold:
-            self.direction = successors[self.direction]
+        if force_spawn or self.spawn_epoch == self.epoch_threshold:
+            self.direction = (self.direction + 1) % 4 + Direction.NORTH 
             self.spawn_epoch = 0
             return Box(coords, self.direction, self.date)
 	

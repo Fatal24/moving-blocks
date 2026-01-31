@@ -5,6 +5,7 @@ import threading
 import time
 import random
 from helper import send_obj, recv_obj
+import random
 
 SERVER_IP = "0.0.0.0"  # <-- Change to host's Wi-Fi IP
 PORT = 6000

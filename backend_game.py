@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Dict
+from typing import Dict, List
 import numpy as np
 from backend_helper import Goal, Tile, Direction, Spawner
 
@@ -14,12 +14,13 @@ class Game:
         dirn = (seed % 4) +  Direction.NORTH # TODO: change to enum when available (by below)
         # 0: up, 1: right, 2: down, 3: left, initial dirn (rotates clockwise every turn)
         size = int(15 + (seed % ((MAX_GAME_SIDE_LENGTH - MIN_GAME_SIDE_LENGTH) / 2)) * 2)
-        self.game = [[Tile() for _ in range(size)] for _ in range(size)]
-        self.game[size // 2][size // 2] = 9
-        self.game[random.randint(2, size // 2 - 2)][random.randint(2, size // 2 - 2)] = 1
-        self.game[random.randint(size // 2 + 2, size - 2)][random.randint(2, size // 2 - 2)] = 2
-        self.game[random.randint(2, size // 2 - 2)][random.randint(size // 2 + 2, size - 2)] = 3
-        self.game[random.randint(size // 2 + 2, size - 2)][random.randint(size // 2 + 2, size - 2)] = 4
+        Grid = List[List[Tile | Spawner | Goal]]
+        self.game : Grid = [[Tile() for _ in range(size)] for _ in range(size)]
+        self.game[size // 2][size // 2] = Spawner((size//2, size//2))
+        self.game[random.randint(2, size // 2 - 2)][random.randint(2, size // 2 - 2)] = Goal(1)
+        self.game[random.randint(size // 2 + 2, size - 2)][random.randint(2, size // 2 - 2)] = Goal(2)
+        self.game[random.randint(2, size // 2 - 2)][random.randint(size // 2 + 2, size - 2)] = Goal(3)
+        self.game[random.randint(size // 2 + 2, size - 2)][random.randint(size // 2 + 2, size - 2)] = Goal(4)
 
         self.boxes = [] 
         self.spawner = Spawner((size // 2, size // 2))
@@ -37,13 +38,13 @@ class Game:
 
                 match x.direction:
                     case Direction.NORTH:
-                        temp_coords[1] = (temp_coords[1] - 1) % size
+                        temp_coords[1] = (temp_coords[1] - 1) % len(self.game)
                     case Direction.SOUTH:
-                        temp_coords[1] = (temp_coords[1] + 1) % size
+                        temp_coords[1] = (temp_coords[1] + 1) % len(self.game)
                     case Direction.EAST:
-                        temp_coords[0] = (temp_coords[0] + 1) % size
+                        temp_coords[0] = (temp_coords[0] + 1) % len(self.game)
                     case Direction.WEST:
-                        temp_coords[0] = (temp_coords[0] - 1) % size
+                        temp_coords[0] = (temp_coords[0] - 1) % len(self.game)
                 
                 conflict = False
 

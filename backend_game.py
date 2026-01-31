@@ -1,9 +1,13 @@
 import math
 import random
 import numpy as np
+from backend_helper import Goal, Tile
 
 MAX_GAME_SIDE_LENGTH = 31
 MIN_GAME_SIDE_LENGTH = 15
+
+global game = []
+
 def iter_game():
 
 def play_game(seed:int, *ips:list[list[int]]):
@@ -20,4 +24,6 @@ def play_game(seed:int, *ips:list[list[int]]):
 
 
 if __name__ == '__main__':
-    play_game(seed=random.randint(0, 2**32 - 1))
+    seed = random.randint(0, 2**32 - 1)
+    play_game(seed=seed)
+    

@@ -15,12 +15,22 @@ class Direction(Enum):
     SOUTH = 3
     WEST = 4
 
+    def __add__(self, other):
+        if other.value == 0:
+            return self.value
+        return Direction((self.value + other.value + 1)%5)
+    def __sub__(self, other):
+        if other.value == 0:
+            return self.value
+        return Direction((self.value - other.value - 1) % 5)
+
 class Box:
     def __init__(self, coords, direction, date):
         self.coords = coords
         self.direction = direction
         self.date = date
         self.img = pygame.image.load(box_path)
+
 
 class Goal:
     def __init__(self, player):

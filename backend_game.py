@@ -11,7 +11,7 @@ class Game:
     def __init__(self, ips, seed):
         self.ips = ips
         self.seed = seed
-        dirn = (seed % 4) +  Direction.NORTH # TODO: change to enum when available (by below)
+        dirn = Direction(seed % 4) + Direction.NORTH
         # 0: up, 1: right, 2: down, 3: left, initial dirn (rotates clockwise every turn)
         size = int(15 + (seed % ((MAX_GAME_SIDE_LENGTH - MIN_GAME_SIDE_LENGTH) / 2)) * 2)
         Grid = List[List[Tile | Spawner | Goal]]
@@ -29,7 +29,6 @@ class Game:
 
     def move_boxes(self):
         if self.boxes:
-            
 
             temp = []
 

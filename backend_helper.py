@@ -13,7 +13,6 @@ class Box:
         self.direction = direction
         self.date = date
 
-    def move_one_place:
         
 
 class Goal:

@@ -35,4 +35,4 @@ def recv_obj(conn):
 
     return pickle.loads(data)
 
-
+def recieve_tiles

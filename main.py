@@ -4,6 +4,7 @@ import socket
 import threading
 import time
 from helper import send_obj, recv_obj
+import random
 
 SERVER_IP = "0.0.0.0"  # <-- Change to host's Wi-Fi IP
 PORT = 6000
@@ -39,7 +40,7 @@ client_data = {"name": "Client", "x": 300, "y": 400}
 
 
 seed = random.randint(0, 2**32 -1)
-game = Game([], seed=seed)
+game = backend_game.Game([], seed=seed)
 
 def get_list_of_tiles():
     return game.game

@@ -1,33 +1,53 @@
 import socket
+import threading
+import time
+from helper import send_obj, recv_obj
 
-SERVER_IP = "192.168.137.61"  # <-- Change this to the host's Wi-Fi IP
-PORT = 5000
+SERVER_IP = "192.168.137.61"  # <-- Change to host's Wi-Fi IP
+PORT = 6000
 
-print(f"[CLIENT] Connecting to {SERVER_IP}:{PORT}...")
+received = []         # incoming packets land here
+running = True
 
-try:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(5)  # 5 second timeout so it doesn't hang forever
-    sock.connect((SERVER_IP, PORT))
-    print("[CLIENT] Connected!\n")
+def recv_loop(sock):
+    """Listens for packets from the host and pushes them into received."""
+    while running:
+        try:
+            packet = recv_obj(sock)
+            if packet is None:
+                print("[CLIENT] Disconnected from host")
+                break
+            received.append(packet)
+        except:
+            break
 
-    # Wait for PING from host
-    data = sock.recv(1024)
-    if data:
-        print(f"[CLIENT] Received: {data.decode()} from host")
+# Setup
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.settimeout(5)
+sock.connect((SERVER_IP, PORT))
+sock.settimeout(None)
+print(f"[CLIENT] Connected to {SERVER_IP}:{PORT}")
 
-        # Send PONG back
-        sock.sendall(b"PONG")
-        print("[CLIENT] Sent PONG back")
-        print("[CLIENT] Connection successful!")
-    else:
-        print("[CLIENT] Connected but received no data.")
+# Start receiving in background
+threading.Thread(target=recv_loop, args=(sock,), daemon=True).start()
 
-    sock.close()
+# Main loop
+client_data = {"name": "Client", "x": 300, "y": 400}
 
-except socket.timeout:
-    print("[CLIENT] Connection timed out. Host didn't respond in time.")
-except ConnectionRefusedError:
-    print("[CLIENT] Connection refused. Is the host running?")
-except OSError as e:
-    print(f"[CLIENT] Error: {e}")
+while running:
+    # Process any packets that came in
+    while received:
+        packet = received.pop(0)
+        print(f"[CLIENT] Got: {packet}")
+
+    # Send client state to host
+    try:
+        send_obj(sock, client_data)
+    except:
+        print("[CLIENT] Failed to send, host probably disconnected")
+        break
+
+    client_data["x"] -= 1
+    time.sleep(0.1)
+
+sock.close()

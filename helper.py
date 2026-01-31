@@ -2,6 +2,14 @@ import socket
 import pickle
 import struct
 
+'''
+ data_packet structure: {type: "INIT_GAME_STATE (server -> user) | 
+                                TILE_PLACE (server <-> user) |
+                                INIT_CONNECTION (server <- user) |",
+                         data: ...}
+                                 
+'''
+
 def send_obj(conn, obj):
     data = pickle.dumps(obj)
     conn.sendall(struct.pack('>I', len(data)) + data)
@@ -26,4 +34,5 @@ def recv_obj(conn):
         data += chunk
 
     return pickle.loads(data)
+
 

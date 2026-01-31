@@ -55,8 +55,8 @@ class Game:
 
                 if not conflict:
                     x.coords = temp_coords
-                    if self.game[x.coords.1][x.coords.0].direction != Direction.STILL and self.game[x.coords.1][x.coords.0] != x.direction:
-                        x.direction = self.game[x.coords.1][x.coords.0]
+                    if self.game[x.coords[1]][x.coords[0]].direction != Direction.STILL and self.game[x.coords[1]][x.coords[0]] != x.direction:
+                        x.direction = self.game[x.coords[1]][x.coords[0]]
 
                 temp.append(x)
 

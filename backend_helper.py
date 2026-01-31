@@ -16,12 +16,12 @@ class Direction(Enum):
     WEST = 4
 
     def __add__(self, other):
-        if other.value == 0:
-            return self.value
+        if other.value == 0 or self.value + other.value < 5:
+            return self.value + other.value
         return Direction((self.value + other.value + 1)%5)
     def __sub__(self, other):
-        if other.value == 0:
-            return self.value
+        if other.value == 0 or self.value - other.value > 0:
+            return self.value - other.value
         return Direction((self.value - other.value - 1) % 5)
 
 class Box:
@@ -65,6 +65,7 @@ class Spawner:
         self.date = 0
         self.spawn_epoch = 0
         self.epoch_threshold = threshold
+        self.coords = coords
         self.img = pygame.image.load(spawner_path)
     
     #return box after initialising
@@ -74,9 +75,9 @@ class Spawner:
         self.spawn_epoch += 1
 
         if force_spawn or self.spawn_epoch == self.epoch_threshold:
-            self.direction = (self.direction + 1) % 4 + Direction.NORTH 
+            self.direction = self.direction + Direction.NORTH
             self.spawn_epoch = 0
-            return Box(coords, self.direction, self.date)
+            return Box(self.coords, self.direction, self.date)
 	
         return None
         

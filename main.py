@@ -264,7 +264,12 @@ def handle_events():
                     place_tile(selected_direction, (col, row))
 
 def update():
-    pass
+    if game_phase == GamePhase.MOVING_BOXES:
+        if animation_frame < TOTAL_ANIMATION_FRAMES:
+            animation_frame += 1
+        else:
+            # Animation finished
+            print("Animation Complete")
 
 def apply_crt_effect(screen, intensity=6, pixelation=8):
     width, height = screen.get_size()
@@ -321,6 +326,98 @@ def apply_crt_effect(screen, intensity=6, pixelation=8):
     screen.blit(glitch_surface, (0, 0))
     pygame.display.flip()
 
+def handle_box_animation(k, n, x_pos, y_pos, direction, tile_size):
+    """
+    Calculates the stretch/move parameters for a box based on its direction.
+    k: current animation step (1 to n)
+    n: total animation steps
+    """
+    # Normalized progress (0.0 to 1.0)
+    progress = k / n
+    
+    # Sine wave for "squash/stretch" effect (0 -> 1 -> 0)
+    # or just linear movement depending on style. 
+    # Using your original "sin/cos" logic for a stretch effect:
+    stretch_factor = math.sin(progress * math.pi) 
+    
+    # Movement offset (0 to 1 tile)
+    offset = progress * tile_size
+
+    # Default values (No movement)
+    draw_x = x_pos
+    draw_y = y_pos
+    width = tile_size - 4
+    height = tile_size - 4
+    
+    if direction == Direction.STILL:
+        pass # No change
+
+    elif direction == Direction.EAST:
+        # Move Right
+        draw_x = x_pos + offset
+        # Optional: Stretch width slightly during move
+        width += stretch_factor * 10 
+        
+    elif direction == Direction.WEST:
+        # Move Left
+        draw_x = x_pos - offset
+        width += stretch_factor * 10
+
+    elif direction == Direction.SOUTH:
+        # Move Down
+        draw_y = y_pos + offset
+        height += stretch_factor * 10
+
+    elif direction == Direction.NORTH:
+        # Move Up
+        draw_y = y_pos - offset
+        height += stretch_factor * 10
+
+    return draw_x, draw_y, width, height
+
+def draw_box_handled(start_x, start_y, tile_size):
+    """
+    Draws the boxes from game.animated_boxes.
+    Assumes 'game.animated_boxes' contains [[col, row], direction]
+    """
+    # 1. Prepare Box Image (Load once)
+    try:
+        box_raw = pygame.image.load(os.path.join("Assets", "Box.png"))
+    except:
+        box_raw = pygame.Surface((32, 32))
+        box_raw.fill((0, 255, 255))
+
+    # 2. Iterate and Draw
+    # We assume 'animation_step' is a global or passed variable tracking frame 1..10
+    # For this static function, I'll hardcode a "middle" frame or rely on an external loop.
+    # If you want this function to handle the loop itself (blocking), see below.
+    # If you want it to just draw the CURRENT state, you need an external counter.
+    
+    # Assuming this function is called inside the main loop and you want to see the animation:
+    # We will simulate the loop here for demonstration as requested "call handler n times".
+    
+    steps = 10
+    for k in range(1, steps + 1):
+        # Clear screen or redraw background here if you want smooth animation 
+        # (Otherwise it trails). For this snippet, we just blit on top.
+        
+        for box in game.animated_boxes:
+            coords = box[0]      # [col, row]
+            direction = box[1]   # Direction Enum
+            
+            # Base position
+            base_x = start_x + coords[0] * tile_size + 2
+            base_y = start_y + coords[1] * tile_size + 2
+            
+            # Get animated transformation
+            dx, dy, w, h = handle_box_animation(k, steps, base_x, base_y, direction, tile_size)
+            
+            # Scale and Draw
+            scaled_box = pygame.transform.scale(box_raw, (int(w), int(h)))
+            screen.blit(scaled_box, (dx, dy))
+        
+        pygame.display.flip()
+        pygame.time.delay(30) # Small delay to see the animation
 
 def draw_lobby():
     font = pygame.font.SysFont(FONTNAME, 55)
@@ -421,11 +518,14 @@ def draw_simulation():
     try:
         bg_tile = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "Tile_Background.png")), (tile_size, tile_size))
         arrow_tile = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "Tile_Arrow.png")), (tile_size, tile_size))
+        box = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "Box.png")), (tile_size - 2 , tile_size - 2))
     except:
         bg_tile = pygame.Surface((tile_size, tile_size))
         bg_tile.fill((100, 100, 100))
         arrow_tile = pygame.Surface((tile_size, tile_size))
         arrow_tile.fill((0, 255, 0))
+        box = pygame.Surface((tile_size - 2, tile_size - 2))
+        box.fill((255, 0, 0))
 
     # Draw Grid Layers
     for i in range(grid_len):
@@ -467,6 +567,24 @@ def draw_simulation():
         center_x = SIDEBAR_WIDTH + avail_w // 2
 
         screen.blit(title, (center_x - title.get_width()//2, 20))
+    
+        #Boxes Layer
+        for box_obj in game.boxes:
+            x_pos = start_x + box_obj.coords[0] * tile_size + 2
+            y_pos = start_y + box_obj.coords[1] * tile_size + 2
+        
+            screen.blit(box, (x_pos, y_pos))
+    
+    if game_phase == GamePhase.MOVING_BOXES:
+        title = TITLE_FONT.render("Moving Phase", True, WHITE)
+        avail_w = SCREEN_WIDTH - SIDEBAR_WIDTH - SCOREBOARD_WIDTH
+        center_x = SIDEBAR_WIDTH + avail_w // 2
+
+        screen.blit(title, (center_x - title.get_width()//2, 20))
+
+        # Animated Boxes Layer
+        # Pass the global animation_frame variable (defined in step 3)
+        draw_box_handled(start_x, start_y, tile_size, animation_frame, TOTAL_ANIMATION_FRAMES)
             
 
 def draw_game_over():
@@ -493,6 +611,8 @@ def draw():
 # REMOVE LATER - Mock setup for testing
 #game = backend_game.Game([], seed=random.randint(0, 2**32 - 1))
 #game.scores = [0, 0, 0, 0] # Initialize scores list
+animation_frame = 0
+TOTAL_ANIMATION_FRAMES = 60 # Adjust speed here (60 = 1 second move)
 
 while running:
     # Process any packets that came in
@@ -536,7 +656,6 @@ while running:
     handle_events()
     update()
     draw()
-
 
     while send:
         try:

@@ -90,7 +90,7 @@ while running:
 
         print(f"[HOST] Got: {packet}")
 
-    if len(clients == number_of_players):
+    if len(clients) == number_of_players:
         broadcast({"type": "INIT_GAME_STATE", "data": {"seed": seed, "player_number": len(clients)}})
 
     if len(tile_placements) == number_of_players:

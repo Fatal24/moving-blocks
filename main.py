@@ -264,6 +264,7 @@ def handle_events():
                     place_tile(selected_direction, (col, row))
 
 def update():
+    global game_phase, animation_frame
     if game_phase == GamePhase.MOVING_BOXES:
         if animation_frame < TOTAL_ANIMATION_FRAMES:
             animation_frame += 1

@@ -92,6 +92,9 @@ class Spawner:
         self.coords = coords
         self.img = pygame.image.load(spawner_path)
     
+    def decrement(self):
+        return
+    
     #return box after initialising
     def spawn(self, force_spawn=False):
         self.direction = self.direction.rot90()

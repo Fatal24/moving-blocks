@@ -92,6 +92,7 @@ while running:
     if len(clients) == number_of_players and not started:
         for client in range(len(clients)):
             send_to(clients[client], {"type": "INIT_GAME_STATE", "data": {"seed": seed, "player_number": client+1}})
+        started = True
 
     if len(tile_placements) == number_of_players:
         broadcast({"type": "TILE_PLACE", "data": tile_placements})

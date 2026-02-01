@@ -225,7 +225,7 @@ def handle_events():
 
         if game_state == GameState.SIMULATION and game_phase == GamePhase.PLACING_TILES:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mx, my = pygame.mouse.get_pos()
+                mx, my = int(XS[pygame.mouse.get_pos()]), int(YS[pygame.mouse.get_pos()])
 
                 # A. Check Sidebar Clicks
                 for direction, rect in sidebar_buttons.items():
@@ -456,6 +456,8 @@ while running:
                     temp_tile = game.game[x["coords"][1]][x["coords"][0]] 
                     if type(temp_tile) == backend_helper.Tile:
                         temp_tile.add_direction(x["direction"])
+
+                game_phase = GamePhase.MOVING_BOXES 
             except:
                 print("Failed to parse TILE_PLACE data! line 68")
 

@@ -89,7 +89,7 @@ while running:
 
         print(f"[HOST] Got: {packet}")
 
-    if len(clients) == number_of_players:
+    if len(clients) == number_of_players and not started:
         for client in range(len(clients)):
             send_to(clients[client], {"type": "INIT_GAME_STATE", "data": {"seed": seed, "player_number": client+1}})
 

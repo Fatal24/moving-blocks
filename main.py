@@ -51,7 +51,7 @@ def recv_loop(sock):
         except:
             break
 
-"""# Setup
+# Setup
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.settimeout(5)
 sock.connect((SERVER_IP, PORT))
@@ -68,7 +68,7 @@ playing = False
 started = False
 
 send.append({"type": "INIT_CONNECTION"})
-"""
+
 game = None
 victory = True
 player_number = -1
@@ -140,7 +140,7 @@ def draw_simulation():
     
     # Game phase (Placing tiles)
     if game_phase == GamePhase.PLACING_TILES:
-        font = pygame.font.SysFont(None, 45)
+        font = pygame.font.SysFont(FONTNAME, 45)
         text = font.render("Placing Tiles Phase - Click on a tile and place it on a grid square", True, (0, 0, 0))
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 20))
     
@@ -157,7 +157,7 @@ def draw_game_over():
     pygame.display.flip()
     pass
 draw_game_over()
-"""
+
 def draw():
     screen.fill((0, 0, 0))
 
@@ -212,10 +212,7 @@ while running:
             print("[CLIENT] Failed to send, host probably disconnected")
             break
 
-    def draw():
-
-
     time.sleep(0.1)
     clock.tick(FPS)
-"""
-#sock.close()
+
+sock.close()

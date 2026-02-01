@@ -64,7 +64,7 @@ while running:
         packet = received.pop(0)
 
         if not started and packet.type == "INIT_GAME_STATE":
-            game = backend_game.Game(packet["data"]["connections"], packet["data"]["seed"])
+            game = backend_game.Game([], packet["data"]["seed"])
             player_number = packet["data"]["player_number"]
             started = True
             playing = True

@@ -2,6 +2,8 @@ import socket
 import threading
 import time
 from helper import send_obj, recv_obj
+import random
+import backend_game
 
 HOST_IP = "0.0.0.0"
 PORT = 6000
@@ -63,19 +65,35 @@ print(f"[HOST] Listening on port {PORT}...")
 # Accept connections in background
 threading.Thread(target=accept_loop, args=(server,), daemon=True).start()
 
+seed = random.randint(0, 2**32-1)
+game = backend_game.Game([], seed=seed)
+
+started = False
+
 # Main loop
-host_data = {"name": "Host", "x": 100, "y": 200}
+
+tile_placements = []
+number_of_players = 2
+
+
 
 while running:
     # Process any packets that came in
     while received:
         conn, packet = received.pop(0)
+
+        if packet["type"] == "INIT_CONNECTION":
+            send_to(conn, {"type": "INIT_GAME_STATE", "data": {"seed": seed, "player_number": len(clients)}})
+            clients.append(conn)
+
+        elif packet["type"] == "TILE_PLACE" and started:
+
+
         print(f"[HOST] Got: {packet}")
 
-    # Broadcast host state to everyone
-    broadcast(host_data)
+    
 
-    host_data["x"] += 1
+    # Broadcast host state to everyone
     time.sleep(0.1)
 
 server.close()

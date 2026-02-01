@@ -268,6 +268,7 @@ def update():
         if animation_frame < TOTAL_ANIMATION_FRAMES:
             animation_frame += 1
         else:
+            game_phase = GamePhase.PLACING_TILES
             # Animation finished
             print("Animation Complete")
 

@@ -19,7 +19,7 @@ from fontTools.ttLib import TTFont
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
-pygame.display.set_caption("Moving Blocks")
+pygame.display.set_caption("Clash of Tiles (this is why we clash)")
 
 # --- CONFIGURATION ---
 WINNINGSCORE = 3

@@ -22,7 +22,7 @@ class GameState(enum.Enum):
 
 game_state = GameState.MAIN_MENU
 
-SERVER_IP = "0.0.0.0"  # <-- Change to host's Wi-Fi IP
+SERVER_IP = "192.168.137.25"  # <-- Change to host's Wi-Fi IP
 PORT = 6000
 
 received = []         # incoming packets land here
@@ -111,7 +111,7 @@ while running:
     while received:
         packet = received.pop(0)
 
-        if not started and packet.type == "INIT_GAME_STATE":
+        if not started and packet["type"] == "INIT_GAME_STATE":
             game = backend_game.Game([], packet["data"]["seed"])
             player_number = packet["data"]["player_number"]
             started = True

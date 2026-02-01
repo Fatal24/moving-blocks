@@ -465,6 +465,7 @@ while running:
     # Process any packets that came in
     while received:
         packet = received.pop(0)
+        print(packet)
 
         if not started and packet["type"] == "INIT_GAME_STATE":
             game = backend_game.Game([], packet["data"]["seed"])
@@ -479,21 +480,19 @@ while running:
             started = True
             playing = True
         
-        elif started and not playing and packet["type"] == "TILE_PLACE":
-            try:
+        elif started and packet["type"] == "TILE_PLACE":
                 # IMPORTANT: Reset local placement limit when a new round starts
                 # Assuming receiving TILE_PLACE implies the previous round ended or new one starting
                 # Logic might need adjustment depending on your exact server phases
                 # For now, we manually reset it when the phase changes
                 
-                for x in packet["data"]:
-                    temp_tile = game.game[x["coords"][1]][x["coords"][0]] 
-                    if type(temp_tile) == backend_helper.Tile:
-                        temp_tile.add_direction(x["direction"])
+            for x in packet["data"]:
+                temp_tile = game.game[x["coords"][1]][x["coords"][0]] 
+                if type(temp_tile) == backend_helper.Tile:
+                    temp_tile.direction = x["direction"]
 
-                game_phase = GamePhase.MOVING_BOXES 
-            except:
-                print("Failed to parse TILE_PLACE data! line 68")
+            game_phase = GamePhase.MOVING_BOXES 
+            print("DOING SHIT")
 
         else: 
             print(f"Found unknown packet: {packet}")

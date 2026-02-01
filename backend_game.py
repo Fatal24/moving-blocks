@@ -9,7 +9,7 @@ MAX_GAME_SIDE_LENGTH = 31
 MIN_GAME_SIDE_LENGTH = 15
 
 class Game:
-    def __init__(self, ips, seed, ):
+    def __init__(self, ips, seed):
         self.ips = ips
         self.seed = seed
         dirn = Direction(seed % 4) + Direction.NORTH
@@ -18,6 +18,7 @@ class Game:
         Grid = List[List[Tile | Spawner | Goal]]
         self.game : Grid = [[Tile() for _ in range(size)] for _ in range(size)]
         self.game[size // 2][size // 2] = Spawner((size//2, size//2))
+        random.seed(self.seed)
         self.game[random.randint(2, size // 2 - 2)][random.randint(2, size // 2 - 2)] = Goal(1)
         self.game[random.randint(size // 2 + 2, size - 2)][random.randint(2, size // 2 - 2)] = Goal(2)
         self.game[random.randint(2, size // 2 - 2)][random.randint(size // 2 + 2, size - 2)] = Goal(3)
@@ -28,7 +29,6 @@ class Game:
         self.spawner = Spawner((size // 2, size // 2))
 
         
-
     def move_boxes(self):
 
         if self.boxes:
@@ -69,15 +69,6 @@ class Game:
         else:
             new_box = self.spawner.spawn(True)
             self.boxes.append(new_box)
-
-            
-
-
-# debug: np.set_printoptions(edgeitems=30, linewidth=100000)
-
-    # game initialised, begin iteration
-    # while([recieving packets]):
-
 
 if __name__ == '__main__':
     seed = random.randint(0, 2**32 - 1)

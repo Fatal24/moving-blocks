@@ -1,5 +1,7 @@
 import enum
+import math
 import os
+import numpy as np
 import backend_game
 import backend_helper
 from backend_helper import Tile, Direction
@@ -243,7 +245,25 @@ def apply_crt_effect(screen, intensity=6, pixelation=8):
     for y in range(0, height, 8):
         if random.random() < static_chance:
             pygame.draw.line(static_surface, (255, 255, 255, random.randint(30, 80)), (0, y), (width, y))
-
+    glitch_surface_arr = pygame.surfarray.pixels3d(glitch_surface).copy()
+    distorted = np.zeros_like(glitch_surface_arr)
+    cx, cy = width / 2, height / 2
+    for y in range(height):
+        for x in range(width):
+            # normalized coords (-1 to 1)
+            nx = (x - cx) / cx
+            ny = (y - cy) / cy
+            r = math.sqrt(nx * nx + ny * ny)
+            # barrel distortion factor
+            k = 0.1
+            nr = r * (1 + k * (r ** 2))
+            if nr == 0:
+                continue
+            tx = int(cx + nx / r * nr * cx)
+            ty = int(cy + ny / r * nr * cy)
+            if 0 <= tx < width and 0 <= ty < height:
+                distorted[x, y] = glitch_surface_arr[tx, ty]
+    glitch_surface = pygame.surfarray.make_surface(distorted)
     screen.blit(glitch_surface, (0, 0))
     pygame.display.flip()
 

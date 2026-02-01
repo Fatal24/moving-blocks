@@ -42,7 +42,6 @@ class Goal:
 class Tile:
     def __init__(self, directions=[], lifespan = 5):
         # TODO: REVERT TO directions when we decide to tolerate multiple directions
-        self.directions = [directions[0]]
         if not directions:
             self.direction = Direction.STILL
         else:

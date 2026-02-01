@@ -1,0 +1,3 @@
+#Screensize 
+SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 650
+FPS = 60

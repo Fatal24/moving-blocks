@@ -83,14 +83,19 @@ while running:
         conn, packet = received.pop(0)
 
         if packet["type"] == "INIT_CONNECTION":
-            send_to(conn, {"type": "INIT_GAME_STATE", "data": {"seed": seed, "player_number": len(clients)}})
             clients.append(conn)
 
         elif packet["type"] == "TILE_PLACE" and started:
-
+            tile_placements.append(packet["data"])
 
         print(f"[HOST] Got: {packet}")
 
+    if len(clients == number_of_players):
+        broadcast({"type": "INIT_GAME_STATE", "data": {"seed": seed, "player_number": len(clients)}})
+
+    if len(tile_placements) == number_of_players:
+        broadcast({"type": "TILE_PLACE", "data": tile_placements})
+        tile_placements = []
     
 
     # Broadcast host state to everyone

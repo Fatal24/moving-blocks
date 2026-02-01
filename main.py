@@ -51,8 +51,8 @@ class GamePhase(enum.Enum):
     MOVING_BOXES = 2
     NOT_SIMULATING = 3
 
-game_state = GameState.SIMULATION
-game_phase = GamePhase.PLACING_TILES
+game_state = GameState.LOBBY
+game_phase = GamePhase.NOT_SIMULATING
 selected_direction = Direction.NORTH
 
 # Track local placement limit

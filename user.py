@@ -3,7 +3,7 @@ import threading
 import time
 from helper import send_obj, recv_obj
 
-SERVER_IP = "192.168.137.61"  # <-- Change to host's Wi-Fi IP
+SERVER_IP = "192.168.137.25"  # <-- Change to host's Wi-Fi IP
 PORT = 6000
 
 received = []         # incoming packets land here

@@ -5,8 +5,8 @@ from typing import Dict, List
 import numpy as np
 from backend_helper import Goal, Tile, Direction, Spawner
 
-MAX_GAME_SIDE_LENGTH = 40
-MIN_GAME_SIDE_LENGTH = 33
+MAX_GAME_SIDE_LENGTH = 21
+MIN_GAME_SIDE_LENGTH = 17
 
 class Game:
     def __init__(self, ips, seed):

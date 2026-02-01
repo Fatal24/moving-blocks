@@ -88,6 +88,7 @@ def handle_events():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        
 
 def update():
     pass
@@ -110,7 +111,7 @@ def draw_simulation():
     tile_grid = get_list_of_tiles()
     tile_grid_size = len(tile_grid)
     tile_size = 32
-    tile_grid_x, tile_grid_y = (SCREEN_WIDTH - tile_grid_size * tile_size) // 2, (SCREEN_HEIGHT - tile_grid_size * tile_size) // 4
+    tile_grid_x, tile_grid_y = (SCREEN_WIDTH - tile_grid_size * tile_size) // 2,2 * (SCREEN_HEIGHT - tile_grid_size * tile_size) // 4
     # Plane grid first
     for i in range(tile_grid_size):
         for j in range(tile_grid_size):
@@ -141,8 +142,14 @@ def draw_simulation():
     # Game phase (Placing tiles)
     if game_phase == GamePhase.PLACING_TILES:
         font = pygame.font.SysFont(FONTNAME, 45)
-        text = font.render("Placing Tiles Phase - Click on a tile and place it on a grid square", True, (0, 0, 0))
+        text = font.render("Placing Tiles Phase", True, (0, 0, 0))
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 20))
+        subfont = pygame.font.SysFont(FONTNAME, 25)
+        text = subfont.render("Click on a tile and place it on a grid square", True, (0, 0, 0))
+        screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 70))
+
+        # Tile selection
+
     
     pygame.display.flip()
             

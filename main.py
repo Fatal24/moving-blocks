@@ -107,6 +107,41 @@ player_number = -1
 def get_list_of_tiles():
     return game.game
 
+def get_layout_metrics():
+    """Helper to calculate grid position and scale uniformly"""
+    tile_grid = get_list_of_tiles()
+    grid_size = len(tile_grid)
+    
+    available_width = SCREEN_WIDTH - SIDEBAR_WIDTH
+    available_height = SCREEN_HEIGHT * 0.8 # Leave space for top text
+    
+    # Calculate tile size to fit smallest dimension
+    tile_size = min(available_width, available_height) // grid_size
+    
+    # Center the grid
+    grid_w_px = grid_size * tile_size
+    grid_h_px = grid_size * tile_size
+    
+    start_x = SIDEBAR_WIDTH + (available_width - grid_w_px) // 2
+    start_y = (SCREEN_HEIGHT - grid_h_px) // 2 + (SCREEN_HEIGHT * 0.05)
+    
+    return start_x, start_y, tile_size
+
+def update_sidebar_buttons():
+    """Recalculate button positions based on current screen size"""
+    global sidebar_buttons
+    btn_size = int(SIDEBAR_WIDTH * 0.6)
+    start_x = (SIDEBAR_WIDTH - btn_size) // 2
+    start_y = int(SCREEN_HEIGHT * 0.25)
+    gap = int(btn_size * 1.2)
+    
+    sidebar_buttons = {
+        Direction.NORTH: pygame.Rect(start_x, start_y, btn_size, btn_size),
+        Direction.EAST:  pygame.Rect(start_x, start_y + gap, btn_size, btn_size),
+        Direction.SOUTH: pygame.Rect(start_x, start_y + gap*2, btn_size, btn_size),
+        Direction.WEST:  pygame.Rect(start_x, start_y + gap*3, btn_size, btn_size)
+    }
+
 def place_tile(direction, coords):
     """
     Validates placement and updates the game state.
@@ -152,9 +187,14 @@ def place_tile(direction, coords):
 
 def handle_events():
     global running, selected_direction
+    
+    # Ensure button rects are up to date
+    update_sidebar_buttons()
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        
         if game_state == GameState.SIMULATION and game_phase == GamePhase.PLACING_TILES:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = pygame.mouse.get_pos()
@@ -167,31 +207,17 @@ def handle_events():
                         return
 
                 # B. Check Grid Clicks
-                # Recalculate grid positioning (same logic as draw_simulation)
-                tile_grid = get_list_of_tiles()
-                tile_grid_size = len(tile_grid)
-                tile_size = 32
+                start_x, start_y, tile_size = get_layout_metrics()
+                grid_size_px = len(get_list_of_tiles()) * tile_size
                 
-                # Center math must match draw_simulation
-                available_width = SCREEN_WIDTH - SIDEBAR_WIDTH
-                tile_grid_x = SIDEBAR_WIDTH + (available_width - tile_grid_size * tile_size) // 2
-                tile_grid_y = 2 * (SCREEN_HEIGHT - tile_grid_size * tile_size) // 4
-                
-                # Check collision with board
-                board_rect = pygame.Rect(
-                    tile_grid_x, tile_grid_y, 
-                    tile_grid_size * tile_size, tile_grid_size * tile_size
-                )
+                board_rect = pygame.Rect(start_x, start_y, grid_size_px, grid_size_px)
 
                 if board_rect.collidepoint(mx, my):
-                    # Convert pixel -> grid
-                    rel_x = mx - tile_grid_x
-                    rel_y = my - tile_grid_y
-                    col = rel_x // tile_size
-                    row = rel_y // tile_size
-                    
+                    rel_x = mx - start_x
+                    rel_y = my - start_y
+                    col = int(rel_x // tile_size)
+                    row = int(rel_y // tile_size)
                     place_tile(selected_direction, (col, row))
-        
 
 def update():
     pass
@@ -272,114 +298,102 @@ def draw_lobby():
     font = pygame.font.SysFont(FONTNAME, 55)
     text = font.render("Lobby - Waiting for everyone to join...", True, WHITE)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
-    apply_crt_effect(screen)
 
 
 def draw_sidebar():
-    """Draws the selection tool on the left"""
     # Sidebar Background
     pygame.draw.rect(screen, (40, 40, 40), (0, 0, SIDEBAR_WIDTH, SCREEN_HEIGHT))
     
     # Title
-    lbl = SUB_FONT.render("Select Arrow:", True, WHITE)
-    screen.blit(lbl, (30, 100))
+    lbl = SUB_FONT.render("Tools:", True, WHITE)
+    screen.blit(lbl, (int(SIDEBAR_WIDTH * 0.1), int(SCREEN_HEIGHT * 0.1)))
+
+    update_sidebar_buttons()
 
     for direction, rect in sidebar_buttons.items():
         # Highlight selected
         if selected_direction == direction:
             pygame.draw.rect(screen, (255, 215, 0), rect.inflate(6, 6), 3)
         
-        # Draw Button Box
+        # Button Box
         pygame.draw.rect(screen, (70, 70, 70), rect)
         pygame.draw.rect(screen, (200, 200, 200), rect, 2)
 
-        # Draw Arrow Icon (Simulated text or image)
-        # In real usage, rotate the arrow image:
+        # Icon
         try:
             arrow_img = pygame.image.load(os.path.join("Assets", "Tile_Arrow.png"))
-            # Rotate based on direction value (1=North=0deg, 2=East=-90deg, etc)
-            # Adjust rotation logic to match your Enum values
             angle = (direction.value - 1) * -90 
-            icon = pygame.transform.rotate(pygame.transform.scale(arrow_img, (64, 64)), angle)
+            scaled_icon = pygame.transform.scale(arrow_img, (int(rect.width * 0.8), int(rect.height * 0.8)))
+            icon = pygame.transform.rotate(scaled_icon, angle)
             icon_rect = icon.get_rect(center=rect.center)
             screen.blit(icon, icon_rect)
         except:
-            # Fallback Text
             txt = GAME_FONT.render(direction.name[0], True, WHITE)
             txt_rect = txt.get_rect(center=rect.center)
             screen.blit(txt, txt_rect)
 
 def draw_simulation():
     screen.fill(BLACK)
-    
-    # 1. Draw Sidebar UI first
     draw_sidebar()
 
-    # 2. Draw Grid
+    # Metrics for scaling
+    start_x, start_y, tile_size = get_layout_metrics()
+    tile_grid = get_list_of_tiles()
+    grid_len = len(tile_grid)
+
+    # Assets
     try:
-        bg_tile = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "Tile_Background.png")), (32, 32))
-        arrow_tile = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "Tile_Arrow.png")), (32, 32))
+        bg_tile = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "Tile_Background.png")), (tile_size, tile_size))
+        arrow_tile = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "Tile_Arrow.png")), (tile_size, tile_size))
     except:
-        bg_tile = pygame.Surface((32, 32))
+        bg_tile = pygame.Surface((tile_size, tile_size))
         bg_tile.fill((100, 100, 100))
-        arrow_tile = pygame.Surface((32, 32))
+        arrow_tile = pygame.Surface((tile_size, tile_size))
         arrow_tile.fill((0, 255, 0))
 
-    tile_grid = get_list_of_tiles()
-    tile_grid_size = len(tile_grid)
-    tile_size = 32
-    
-    # Calculate Centered Position (Offset by sidebar)
-    available_width = SCREEN_WIDTH - SIDEBAR_WIDTH
-    tile_grid_x = SIDEBAR_WIDTH + (available_width - tile_grid_size * tile_size) // 2
-    tile_grid_y = 2 * (SCREEN_HEIGHT - tile_grid_size * tile_size) // 4
-    
-    # Draw Background Layer
-    for i in range(tile_grid_size):
-        for j in range(tile_grid_size):
-            screen.blit(bg_tile, (tile_grid_x + i * tile_size, tile_grid_y + j * tile_size))
-    
-    # Draw Object Layer
-    for i in range(tile_grid_size):
-        for j in range(tile_grid_size):
-            # i = col, j = row
-            tile = tile_grid[j][i]
-            x_pos = tile_grid_x + i * tile_size
-            y_pos = tile_grid_y + j * tile_size
+    # Draw Grid Layers
+    for i in range(grid_len):
+        for j in range(grid_len):
+            x_pos = start_x + i * tile_size
+            y_pos = start_y + j * tile_size
+            
+            # Layer 0: Background
+            screen.blit(bg_tile, (x_pos, y_pos))
 
+            # Layer 1: Objects
+            tile = tile_grid[j][i]
+            
             if isinstance(tile, Tile):
                 if tile.direction != Direction.STILL:
-                    # Rotate Arrow
-                    # Assuming Direction values: North=1, East=2, South=3, West=4
-                    # Pygame rotate is counter-clockwise. North (0) -> West (90)
-                    # We need to map your Enum to angles.
-                    # If North is default UP:
                     angle = (tile.direction.value - 1) * -90
-                    rotated_arrow = pygame.transform.rotate(arrow_tile, angle)
-                    screen.blit(rotated_arrow, (x_pos, y_pos))
+                    rotated = pygame.transform.rotate(arrow_tile, angle)
+                    # Re-center after rotation
+                    new_rect = rotated.get_rect(center=(x_pos + tile_size//2, y_pos + tile_size//2))
+                    screen.blit(rotated, new_rect)
             
             elif isinstance(tile, backend_helper.Spawner):
                 if hasattr(tile, 'img'):
-                    screen.blit(pygame.transform.scale(tile.img, (32, 32)), (x_pos, y_pos))
+                     screen.blit(pygame.transform.scale(tile.img, (tile_size, tile_size)), (x_pos, y_pos))
                 else:
-                    pygame.draw.rect(screen, (128, 0, 128), (x_pos, y_pos, 32, 32))
+                     pygame.draw.rect(screen, (128, 0, 128), (x_pos, y_pos, tile_size, tile_size))
 
             elif isinstance(tile, backend_helper.Goal):
-                if hasattr(tile, 'img'):
-                    screen.blit(pygame.transform.scale(tile.img, (32, 32)), (x_pos, y_pos))
-                else:
-                    pygame.draw.rect(screen, (255, 215, 0), (x_pos, y_pos, 32, 32))
+                 if hasattr(tile, 'img'):
+                     screen.blit(pygame.transform.scale(tile.img, (tile_size, tile_size)), (x_pos, y_pos))
+                 else:
+                     pygame.draw.rect(screen, (255, 215, 0), (x_pos, y_pos, tile_size, tile_size))
 
-    # 3. Draw Game Phase Text
+    # Text Overlay
     if game_phase == GamePhase.PLACING_TILES:
-        text = TITLE_FONT.render("Placing Tiles Phase", True, (0, 0, 0))
-        # Center text in the remaining space
-        text_x = SIDEBAR_WIDTH + (available_width - text.get_width()) // 2
-        screen.blit(text, (text_x, 20))
+        title = TITLE_FONT.render("Placing Phase", True, WHITE)
+        sub = SUB_FONT.render("Select arrow -> Click grid", True, (200, 200, 200))
         
-        text2 = SUB_FONT.render("Click sidebar to select arrow -> Click grid to place", True, (50, 50, 50))
-        text2_x = SIDEBAR_WIDTH + (available_width - text2.get_width()) // 2
-        screen.blit(text2, (text2_x, 70))
+        # Center text in available space
+        avail_w = SCREEN_WIDTH - SIDEBAR_WIDTH
+        center_x = SIDEBAR_WIDTH + avail_w // 2
+        
+        screen.blit(title, (center_x - title.get_width()//2, 20))
+        screen.blit(sub, (center_x - sub.get_width()//2, 80))
             
 
 def draw_game_over():
@@ -389,7 +403,6 @@ def draw_game_over():
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2 - 40))
     text = font.render("CONGRATULATIONS - You won!" if victory else "Better luck next time...", True, (255, 255, 255))
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + text.get_height() // 2 + 40))
-    apply_crt_effect(screen)
 
 def draw():
     screen.fill((0, 0, 0))
@@ -401,7 +414,7 @@ def draw():
     elif game_state == GameState.GAME_OVER:
         draw_game_over()
 
-    pygame.display.flip()
+    apply_crt_effect(screen)
 
 # REMOVE LATER
 game = backend_game.Game([], seed=random.randint(0, 2**32 - 1))

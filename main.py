@@ -19,9 +19,11 @@ from fontTools.ttLib import TTFont
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
-pygame.display.set_caption("Moving Blocks")
+pygame.display.set_caption("Clash of Tiles (this is why we clash)")
+pygame.display.set_icon(pygame.image.load(os.path.join("Assets","Tile_Arrow.png")))
 
 # --- CONFIGURATION ---
+WINNINGSCORE = 3
 SIDEBAR_WIDTH = 200      # Left side (Tools)
 SCOREBOARD_WIDTH = 200   # Right side (Scores)
 TILES_PER_TURN = 1       # Limit how many tiles a player can place
@@ -483,6 +485,9 @@ def draw_scoreboard():
             # i+1 is Player ID
             p_text = f"P{i+1}:"
             s_text = f"{score}"
+            if score == WINNINGSCORE:
+                global running
+                running = False
             
             y_pos = 300 + (i * 60)
             
@@ -491,6 +496,8 @@ def draw_scoreboard():
             if i + 1 == player_number: 
                 color = (100, 255, 100) # Green for self
                 p_text += " (You)"
+                global victory
+                victory = True
 
             # Render Player Name
             name_surf = GAME_FONT.render(p_text, True, color)
@@ -647,7 +654,11 @@ while running:
                 temp_tile.direction = x["direction"]
 
             game_phase = GamePhase.MOVING_BOXES
-            game.move_boxes()
+            for i in range(game.num_moves):
+                game.move_boxes()
+                draw()
+                time.sleep(1)
+
             tiles_placed_count = 0
             animation_frame = 0
             print("DOING SHIT")

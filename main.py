@@ -33,12 +33,12 @@ try:
         raise FileNotFoundError
     GAME_FONT = pygame.font.Font(font_path, 24)
     TITLE_FONT = pygame.font.Font(font_path, 55)
-    SUB_FONT = pygame.font.Font(font_path, 25)
+    SUB_FONT = pygame.font.Font(font_path, 35)
 except:
     print("Custom font not found, using system default.")
     GAME_FONT = pygame.font.SysFont("Arial", 24)
     TITLE_FONT = pygame.font.SysFont("Arial", 55)
-    SUB_FONT = pygame.font.SysFont("Arial", 25)
+    SUB_FONT = pygame.font.SysFont("Arial", 35)
 
 class GameState(enum.Enum):
     LOBBY = 1
@@ -319,8 +319,8 @@ def draw_sidebar():
     pygame.draw.rect(screen, (40, 40, 40), (0, 0, SIDEBAR_WIDTH, SCREEN_HEIGHT))
     
     # Title
-    lbl = SUB_FONT.render("Tools:", True, WHITE)
-    screen.blit(lbl, (int(SIDEBAR_WIDTH * 0.1), int(SCREEN_HEIGHT * 0.1)))
+    lbl = SUB_FONT.render("Tiles:", True, WHITE)
+    screen.blit(lbl, (int(SIDEBAR_WIDTH * 0.1), int(SCREEN_HEIGHT * 0.15)))
 
     update_sidebar_buttons()
 

@@ -267,13 +267,12 @@ def update():
     global game_phase, animation_frame
 
     if game_phase == GamePhase.MOVING_BOXES:
-        game.move_boxes()
-        if animation_frame < TOTAL_ANIMATION_FRAMES:
-            animation_frame += 1
-        else:
-            game_phase = GamePhase.PLACING_TILES
+        #if animation_frame < TOTAL_ANIMATION_FRAMES:
+        #    animation_frame += 1
+        #else:
+        game_phase = GamePhase.PLACING_TILES
             # Animation finished
-            print("Animation Complete")
+        #    print("Animation Complete")
 
 def apply_crt_effect(screen, intensity=6, pixelation=8):
     width, height = screen.get_size()
@@ -648,7 +647,7 @@ while running:
                 temp_tile.direction = x["direction"]
 
             game_phase = GamePhase.MOVING_BOXES
-            
+            game.move_boxes()
             tiles_placed_count = 0
             animation_frame = 0
             print("DOING SHIT")
@@ -661,9 +660,6 @@ while running:
 
     handle_events()
     update()
-    if game:
-        print(game.animation_boxes)
-        print(game.boxes)
     draw()
 
     while send:

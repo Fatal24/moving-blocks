@@ -34,8 +34,9 @@ class Game:
     def move_boxes(self):
 
         if self.boxes:
-            self.spawner.spawn()
-
+            new_box = self.spawner.spawn()
+            if new_box:
+                self.boxes.append(new_box)
             temp = []
             temp_animation = []
 
@@ -67,14 +68,14 @@ class Game:
                     
                     
                     else:
-                        temp_animation.append((x.coords,x.direction))
+                        temp.append(x)
                         if self.game[x.coords[1]][x.coords[0]].direction != Direction.STILL and self.game[x.coords[1]][x.coords[0]] != x.direction:
                             x.direction = self.game[x.coords[1]][x.coords[0]].direction 
-                            temp.append(x)
+                            temp_animation.append((x.coords,x.direction))
 
 
             self.old = self.boxes
-            self.boxes = deepcopy(temp)
+            self.boxes = temp
             self.animation_boxes = deepcopy(temp_animation)
 
         else:

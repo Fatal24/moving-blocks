@@ -90,7 +90,7 @@ class Spawner:
     
     #return box after initialising
     def spawn(self, force_spawn=False):
-
+        self.direction = self.direction.rot90()
         self.date += 1
         self.spawn_epoch += 1
 

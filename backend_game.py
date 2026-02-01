@@ -27,6 +27,7 @@ class Game:
         self.boxes = []
         self.old = []
         self.spawner = Spawner((size // 2, size // 2))
+        self.scores = [0, 0, 0, 0]
 
         
     def move_boxes(self):
@@ -58,7 +59,10 @@ class Game:
 
                 if not conflict:
                     x.coords = temp_coords
-                    if self.game[x.coords[1]][x.coords[0]].direction != Direction.STILL and self.game[x.coords[1]][x.coords[0]] != x.direction:
+                    if type(self.game[x.coords[1]][x.coords[0]]) == Goal:
+                        self.scores[self.game[x.coords[1]][x.coords[0]].player - 1] += 1
+                        
+                    elif self.game[x.coords[1]][x.coords[0]].direction != Direction.STILL and self.game[x.coords[1]][x.coords[0]] != x.direction:
                         x.direction = self.game[x.coords[1]][x.coords[0]]
 
                 temp.append(x)
@@ -73,4 +77,3 @@ class Game:
 if __name__ == '__main__':
     seed = random.randint(0, 2**32 - 1)
     game = Game([], seed=seed)
-    

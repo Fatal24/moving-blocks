@@ -46,14 +46,14 @@ class Goal:
         self.img = pygame.image.load(goal_path)
 
 class Tile:
-    def __init__(self, directions=[], lifespan = 5):
+    def __init__(self, directions=[], lifespan = 3):
         # TODO: REVERT TO directions when we decide to tolerate multiple directions
         if not directions:
             self.direction = Direction.STILL
         else:
             self.direction = directions[0]
         self.lifespan = lifespan
-        self.i = 0
+        
 
     def get_direction(self):
         return self.direction
@@ -64,6 +64,10 @@ class Tile:
         self.i = (self.i+1) % len(self.directions)"""
         
         return return_dir
+    def decrement(self):
+        self.lifespan -= 1
+        if self.lifespan == 0:
+            self.direction == Direction.STILL
 
     def change_direction(self, direction):
         pass

@@ -5,13 +5,14 @@ from typing import Dict, List
 import numpy as np
 from backend_helper import Goal, Tile, Direction, Spawner
 
-MAX_GAME_SIDE_LENGTH = 25
-MIN_GAME_SIDE_LENGTH = 15
+MAX_GAME_SIDE_LENGTH = 40
+MIN_GAME_SIDE_LENGTH = 33
 
 class Game:
     def __init__(self, ips, seed):
         self.ips = ips
         self.seed = seed
+        self.num_moves = 3
         dirn = Direction(seed % 4) + Direction.NORTH
         # 0: up, 1: right, 2: down, 3: left, initial dirn (rotates clockwise every turn)
         size = int(MIN_GAME_SIDE_LENGTH + (seed % ((MAX_GAME_SIDE_LENGTH - MIN_GAME_SIDE_LENGTH) / 2)) * 2)
@@ -70,7 +71,8 @@ class Game:
                     else:
                         temp.append(x)
                         if self.game[x.coords[1]][x.coords[0]].direction != Direction.STILL and self.game[x.coords[1]][x.coords[0]] != x.direction:
-                            x.direction = self.game[x.coords[1]][x.coords[0]].direction 
+                            x.direction = self.game[x.coords[1]][x.coords[0]].direction
+                            self.game[x.coords[1]][x.coords[0]].decrement()
                             temp_animation.append((x.coords,x.direction))
 
 

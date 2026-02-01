@@ -1,4 +1,6 @@
 import enum
+import os
+
 import backend_game
 import backend_helper
 import socket
@@ -11,7 +13,7 @@ import pygame
 from Config import *
 from fontTools.ttLib import TTFont
 FONTNAME = "GothicByte"
-font = TTFont(f"{FONTNAME}.ttf")
+font = TTFont(os.path.join("Assets", f"{FONTNAME}.ttf"))
 # Pygame setup
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

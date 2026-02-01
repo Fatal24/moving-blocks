@@ -185,7 +185,7 @@ def place_tile(direction, coords):
 
     # 1. Check Placement Limit
     if tiles_placed_count >= TILES_PER_TURN:
-        print(f"❌ Limit Reached! You can only place {TILES_PER_TURN} tile(s) per turn.")
+        print(f"Limit Reached! You can only place {TILES_PER_TURN} tile(s) per turn.")
         return
 
     col, row = coords
@@ -198,18 +198,18 @@ def place_tile(direction, coords):
 
     # 3. Must be a standard Tile (not Spawner/Goal)
     if not isinstance(tile_obj, Tile):
-        print("❌ Cannot place on Special Object")
+        print("Cannot place on Special Object")
         return
 
     # 4. Must be empty (Direction.STILL) - Prevent overlapping
     if tile_obj.direction != Direction.STILL:
-        print("❌ Tile already occupied!")
+        print("Tile already occupied!")
         return
 
     # 5. Cannot place under a Box
     for box in game.boxes:
         if box.coords == [col, row]:
-            print("❌ Cannot place under a Box")
+            print("Cannot place under a Box")
             return
 
     # Send to Server
@@ -223,7 +223,7 @@ def place_tile(direction, coords):
         
         # Increment Counter
         tiles_placed_count += 1
-        print(f"✅ Placed {direction.name} at {coords} ({tiles_placed_count}/{TILES_PER_TURN})")
+        print(f"Placed {direction.name} at {coords} ({tiles_placed_count}/{TILES_PER_TURN})")
         
     except Exception as e:
         print(f"Error placing tile: {e}")
@@ -519,10 +519,10 @@ while running:
                 # Logic might need adjustment depending on your exact server phases
                 # For now, we manually reset it when the phase changes
                 
-            for x in packet["data"]:
+            for x in reversed(packet["data"]):
                 temp_tile = game.game[x["coords"][1]][x["coords"][0]] 
-                if type(temp_tile) == backend_helper.Tile:
-                    temp_tile.direction = x["direction"]
+                #if type(temp_tile) == backend_helper.Tile:
+                temp_tile.direction = x["direction"]
 
             game_phase = GamePhase.MOVING_BOXES 
             print("DOING SHIT")

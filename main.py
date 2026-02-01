@@ -586,7 +586,7 @@ def draw_simulation():
 
         # Animated Boxes Layer
         # Pass the global animation_frame variable (defined in step 3)
-        draw_box_handled(start_x, start_y, tile_size, animation_frame, TOTAL_ANIMATION_FRAMES)
+        draw_box_handled(start_x, start_y, tile_size)
             
 
 def draw_game_over():

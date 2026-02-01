@@ -8,8 +8,8 @@ import random
 from helper import send_obj, recv_obj
 import random
 import pygame
-from Config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
-
+from Config import *
+FONTNAME = "GothicByte"
 # Pygame setup
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -20,7 +20,7 @@ class GameState(enum.Enum):
     SIMULATION = 2
     GAME_OVER = 3
 
-game_state = GameState.MAIN_MENU
+game_state = GameState.LOBBY
 
 SERVER_IP = "192.168.137.25"  # <-- Change to host's Wi-Fi IP
 PORT = 6000
@@ -41,7 +41,7 @@ def recv_loop(sock):
         except:
             break
 
-# Setup
+"""# Setup
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.settimeout(5)
 sock.connect((SERVER_IP, PORT))
@@ -58,8 +58,9 @@ playing = False
 started = False
 
 send.append({"type": "INIT_CONNECTION"})
+"""
 game = None
-
+victory = True
 player_number = -1
 
 def get_list_of_tiles():
@@ -82,18 +83,29 @@ def update():
     pass
 
 def draw_lobby():
-    font = pygame.font.SysFont(None, 55)
-    text = font.render("Lobby - Waiting for everyone to join...", True, (255, 255, 255))
+    screen.fill(BLACK)
+    font = pygame.font.SysFont(FONTNAME, 55)
+    text = font.render("Lobby - Waiting for everyone to join...", True, WHITE)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
+    pygame.display.flip()
+    pass
+
+draw_lobby()
 
 def draw_simulation():
     pass
 
 def draw_game_over():
-    font = pygame.font.SysFont(None, 55)
+    screen.fill(BLACK)
+    font = pygame.font.SysFont(FONTNAME, 55)
     text = font.render("Game Over!", True, (255, 255, 255))
-    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
-
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2 - 40))
+    text = font.render("CONGRATULATIONS - You won!" if victory else "Better luck next time...", True, (255, 255, 255))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + text.get_height() // 2 + 40))
+    pygame.display.flip()
+    pass
+draw_game_over()
+"""
 def draw():
     screen.fill((0, 0, 0))
 
@@ -145,7 +157,10 @@ while running:
             print("[CLIENT] Failed to send, host probably disconnected")
             break
 
+    def draw():
+
+
     time.sleep(0.1)
     clock.tick(FPS)
-
-sock.close()
+"""
+#sock.close()

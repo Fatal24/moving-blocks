@@ -647,7 +647,11 @@ while running:
                 temp_tile.direction = x["direction"]
 
             game_phase = GamePhase.MOVING_BOXES
-            game.move_boxes()
+            for i in range(game.num_moves):
+                game.move_boxes()
+                draw_simulation()
+                time.sleep(0.5)
+
             tiles_placed_count = 0
             animation_frame = 0
             print("DOING SHIT")

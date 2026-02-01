@@ -36,7 +36,7 @@ def recv_loop(conn, addr):
             break
 
     # Clean up on disconnect
-    clients[:] = [(c, a) for c, a in clients if c != conn]
+    clients[:] = [c for c in clients if c != conn]
     print(f"[HOST] {addr} disconnected ({len(clients)} remaining)")
     conn.close()
 

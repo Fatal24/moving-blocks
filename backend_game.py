@@ -26,6 +26,7 @@ class Game:
 
         self.boxes = []
         self.old = []
+        self.animation_boxes = []
         self.spawner = Spawner((size // 2, size // 2))
         self.scores = [0, 0, 0, 0]
 
@@ -36,6 +37,7 @@ class Game:
             self.spawner.spawn()
 
             temp = []
+            temp_animation = []
 
             for idx, x in enumerate(self.boxes):
                 temp_coords = x.coords
@@ -55,6 +57,7 @@ class Game:
                 for idy, y in enumerate(temp):
                     if temp_coords == y.coords:
                         conflict = True
+                        temp_animation.append((x.coords,Direction.STILL))
                         break
 
                 if not conflict:
@@ -63,12 +66,13 @@ class Game:
                         self.scores[self.game[x.coords[1]][x.coords[0]].player - 1] += 1
                         
                     elif self.game[x.coords[1]][x.coords[0]].direction != Direction.STILL and self.game[x.coords[1]][x.coords[0]] != x.direction:
+                        temp_animation.append((x.coords,x.direction))
                         x.direction = self.game[x.coords[1]][x.coords[0]]
-
-                temp.append(x)
+                        temp.append(x)
 
             self.old = self.boxes
             self.boxes = deepcopy(temp)
+            self.animation_boxes = deepcopy(temp_animation)
 
         else:
             new_box = self.spawner.spawn(True)

@@ -5,7 +5,7 @@ from typing import Dict, List
 import numpy as np
 from backend_helper import Goal, Tile, Direction, Spawner
 
-MAX_GAME_SIDE_LENGTH = 31
+MAX_GAME_SIDE_LENGTH = 25
 MIN_GAME_SIDE_LENGTH = 15
 
 class Game:
@@ -14,7 +14,7 @@ class Game:
         self.seed = seed
         dirn = Direction(seed % 4) + Direction.NORTH
         # 0: up, 1: right, 2: down, 3: left, initial dirn (rotates clockwise every turn)
-        size = int(15 + (seed % ((MAX_GAME_SIDE_LENGTH - MIN_GAME_SIDE_LENGTH) / 2)) * 2)
+        size = int(MIN_GAME_SIDE_LENGTH + (seed % ((MAX_GAME_SIDE_LENGTH - MIN_GAME_SIDE_LENGTH) / 2)) * 2)
         Grid = List[List[Tile | Spawner | Goal]]
         self.game : Grid = [[Tile() for _ in range(size)] for _ in range(size)]
         self.game[size // 2][size // 2] = Spawner((size//2, size//2))

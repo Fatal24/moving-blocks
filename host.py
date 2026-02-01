@@ -17,7 +17,6 @@ def accept_loop(server):
     while running:
         try:
             conn, addr = server.accept()
-            clients.append((conn, addr))
             print(f"[HOST] {addr} connected ({len(clients)} total)")
 
             t = threading.Thread(target=recv_loop, args=(conn, addr), daemon=True)
@@ -50,7 +49,7 @@ def send_to(conn, packet):
 
 def broadcast(packet, exclude=None):
     """Send a packet to all clients, optionally excluding one."""
-    for conn, addr in clients:
+    for conn in clients:
         if conn == exclude:
             continue
         send_to(conn, packet)

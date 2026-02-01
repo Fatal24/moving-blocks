@@ -9,7 +9,9 @@ from helper import send_obj, recv_obj
 import random
 import pygame
 from Config import *
+from fontTools.ttLib import TTFont
 FONTNAME = "GothicByte"
+font = TTFont(f"{FONTNAME}.ttf")
 # Pygame setup
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

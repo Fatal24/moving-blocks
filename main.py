@@ -7,8 +7,22 @@ import time
 import random
 from helper import send_obj, recv_obj
 import random
+import pygame
+from Config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 
-SERVER_IP = "0.0.0.0"  # <-- Change to host's Wi-Fi IP
+# Pygame setup
+pygame.init()
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+clock = pygame.time.Clock()
+
+class GameState(enum.Enum):
+    LOBBY = 1
+    SIMULATION = 2
+    GAME_OVER = 3
+
+game_state = GameState.MAIN_MENU
+
+SERVER_IP = "192.168.137.25"  # <-- Change to host's Wi-Fi IP
 PORT = 6000
 
 received = []         # incoming packets land here
@@ -58,12 +72,46 @@ def place_tile(direction, coords):
     except:
         print("Invalid placemnet!")
 
+def handle_events():
+    global running
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+def update():
+    pass
+
+def draw_lobby():
+    font = pygame.font.SysFont(None, 55)
+    text = font.render("Lobby - Waiting for everyone to join...", True, (255, 255, 255))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
+
+def draw_simulation():
+    pass
+
+def draw_game_over():
+    font = pygame.font.SysFont(None, 55)
+    text = font.render("Game Over!", True, (255, 255, 255))
+    screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
+
+def draw():
+    screen.fill((0, 0, 0))
+
+    if game_state == GameState.LOBBY:
+        draw_lobby()
+    elif game_state == GameState.SIMULATION:
+        draw_simulation()
+    elif game_state == GameState.GAME_OVER:
+        draw_game_over()
+
+    pygame.display.flip()
+
 while running:
     # Process any packets that came in
     while received:
         packet = received.pop(0)
 
-        if not started and packet.type == "INIT_GAME_STATE":
+        if not started and packet["type"] == "INIT_GAME_STATE":
             game = backend_game.Game([], packet["data"]["seed"])
             player_number = packet["data"]["player_number"]
             started = True
@@ -84,6 +132,11 @@ while running:
         print(f"[CLIENT] Got: {packet}")
 
 
+    handle_events()
+    update()
+    draw()
+
+
     while send:
         try:
             o = send.pop(0)
@@ -93,5 +146,6 @@ while running:
             break
 
     time.sleep(0.1)
+    clock.tick(FPS)
 
 sock.close()

@@ -225,7 +225,7 @@ def handle_events():
 
         if game_state == GameState.SIMULATION and game_phase == GamePhase.PLACING_TILES:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mx, my = pygame.mouse.get_pos()
+                mx, my = int(XS[pygame.mouse.get_pos()]), int(YS[pygame.mouse.get_pos()])
 
                 # A. Check Sidebar Clicks
                 for direction, rect in sidebar_buttons.items():

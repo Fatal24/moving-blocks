@@ -29,7 +29,7 @@ class GamePhase(enum.Enum):
     MOVING_BOXES = 2
     NOT_SIMULATING = 3
 
-game_state = GameState.SIMULATION
+game_state = GameState.LOBBY
 game_phase = GamePhase.PLACING_TILES
 
 SERVER_IP = "192.168.137.61"  # <-- Change to host's Wi-Fi IP
@@ -70,7 +70,7 @@ started = False
 send.append({"type": "INIT_CONNECTION"})
 
 game = None
-victory = True
+victory = False
 player_number = -1
 
 def get_list_of_tiles():
@@ -93,15 +93,66 @@ def handle_events():
 def update():
     pass
 
+def apply_crt_effect(screen, intensity=6, pixelation=8):
+    width, height = screen.get_size()
+    glitch_surface = screen.copy()
+
+    scanline_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+
+    for y in range(0, height, max(1, 8-intensity)):
+        pygame.draw.line(scanline_surface, (0, 0, 0, 60), (0, y), (width, y))
+
+    screen.blit(scanline_surface, (0, 0))
+
+    small_surf = pygame.transform.scale(screen, (width // pixelation, height // pixelation))
+    screen.blit(pygame.transform.scale(small_surf, (width, height)), (0, 0))
+
+    if random.randint(0, 15) == 0:
+        flicker_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        flicker_surface.fill((255, 255, 255, 5))
+        screen.blit(flicker_surface, (0, 0))
+
+    glow_surf = pygame.transform.smoothscale(screen, (width // 2, height // 2))
+    glow_surf = pygame.transform.smoothscale(glow_surf, (width, height))
+    glow_surf.set_alpha(100)
+    screen.blit(glow_surf, (0, 0))
+
+    shift_amount = intensity*10
+    if random.random() < 0.2:
+        y_start = random.randint(0, height - 20)
+        slice_height = random.randint(5, 20)
+        offset = random.randint(-shift_amount, shift_amount)
+
+        slice_area = pygame.Rect(0, y_start, width, slice_height)
+        slice_copy = glitch_surface.subsurface(slice_area).copy()
+        glitch_surface.blit(slice_copy, (offset, y_start))
+
+    color_shift = intensity*2
+    if random.random() < 0.1:
+        for i in range(3):
+            x_offset = random.randint(-color_shift, color_shift)
+            y_offset = random.randint(-color_shift, color_shift)
+
+            shifted = glitch_surface.copy()
+            screen.blit(shifted, (x_offset, y_offset), special_flags=pygame.BLEND_ADD)
+
+    static_chance = intensity/8
+    static_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+
+    for y in range(0, height, 8):
+        if random.random() < static_chance:
+            pygame.draw.line(static_surface, (255, 255, 255, random.randint(30, 80)), (0, y), (width, y))
+
+    screen.blit(glitch_surface, (0, 0))
+    pygame.display.flip()
+
+
 def draw_lobby():
-    screen.fill(BLACK)
     font = pygame.font.SysFont(FONTNAME, 55)
     text = font.render("Lobby - Waiting for everyone to join...", True, WHITE)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
-    pygame.display.flip()
-    pass
+    apply_crt_effect(screen)
 
-draw_lobby()
 
 def draw_simulation():
     screen.fill(WHITE)
@@ -161,9 +212,7 @@ def draw_game_over():
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2 - 40))
     text = font.render("CONGRATULATIONS - You won!" if victory else "Better luck next time...", True, (255, 255, 255))
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + text.get_height() // 2 + 40))
-    pygame.display.flip()
-    pass
-draw_game_over()
+    apply_crt_effect(screen)
 
 def draw():
     screen.fill((0, 0, 0))
@@ -219,7 +268,6 @@ while running:
             print("[CLIENT] Failed to send, host probably disconnected")
             break
 
-    time.sleep(0.1)
     clock.tick(FPS)
 
 sock.close()

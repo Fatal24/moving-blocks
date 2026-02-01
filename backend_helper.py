@@ -50,11 +50,12 @@ class Tile:
         self.i = 0
 
     def get_direction(self):
-        if not self.directions:
+        return self.direction
+        """if not self.directions:
             return Direction.STILL
 
         return_dir = self.directions[self.i]
-        self.i = (self.i+1) % len(self.directions)
+        self.i = (self.i+1) % len(self.directions)"""
         
         return return_dir
 

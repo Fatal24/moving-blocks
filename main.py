@@ -653,11 +653,13 @@ while running:
                 #if type(temp_tile) == backend_helper.Tile:
                 temp_tile.direction = x["direction"]
 
-            game_phase = GamePhase.MOVING_BOXES
+            
             for i in range(game.num_moves):
                 game.move_boxes()
                 draw()
                 time.sleep(1)
+            
+            game_phase = GamePhase.MOVING_BOXES
 
             tiles_placed_count = 0
             animation_frame = 0

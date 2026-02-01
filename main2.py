@@ -34,7 +34,7 @@ RED = (255, 100, 100)
 YELLOW = (255, 255, 100)
 
 # Network Configuration
-SERVER_IP = "127.0.0.1"  # Change to server IP
+SERVER_IP = "192.168.137.53"  # Change to server IP
 PORT = 6000
 
 class Button:

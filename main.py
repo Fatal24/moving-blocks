@@ -54,6 +54,34 @@ game_state = GameState.SIMULATION
 game_phase = GamePhase.PLACING_TILES
 selected_direction = Direction.NORTH
 
+XS = []
+YS = []
+def precompute_distortion(width = SCREEN_WIDTH, height = SCREEN_HEIGHT, k=0.15):
+    """Returns lookup arrays mapping dest->src pixels."""
+    cx, cy = width / 2, height / 2
+    xs = np.zeros((width, height), np.int16)
+    ys = np.zeros((width, height), np.int16)
+    for y in range(height):
+        for x in range(width):
+            nx = (x - cx) / cx
+            ny = (y - cy) / cy
+            r = math.sqrt(nx * nx + ny * ny)
+            nr = r * (1 + k * (r ** 2))
+            if r != 0:
+                tx = int(cx + nx / r * nr * cx)
+                ty = int(cy + ny / r * nr * cy)
+            else:
+                tx, ty = x, y
+            tx = max(0, min(width - 1, tx))
+            ty = max(0, min(height - 1, ty))
+            xs[x, y] = tx
+            ys[x, y] = ty
+    global XS
+    XS = xs
+    global YS
+    YS = ys
+
+precompute_distortion()
 # --- UI RECTS ---
 # Define buttons for sidebar selection
 sidebar_buttons = {
@@ -111,20 +139,20 @@ def get_layout_metrics():
     """Helper to calculate grid position and scale uniformly"""
     tile_grid = get_list_of_tiles()
     grid_size = len(tile_grid)
-    
+
     available_width = SCREEN_WIDTH - SIDEBAR_WIDTH
     available_height = SCREEN_HEIGHT * 0.8 # Leave space for top text
-    
+
     # Calculate tile size to fit smallest dimension
     tile_size = min(available_width, available_height) // grid_size
-    
+
     # Center the grid
     grid_w_px = grid_size * tile_size
     grid_h_px = grid_size * tile_size
-    
+
     start_x = SIDEBAR_WIDTH + (available_width - grid_w_px) // 2
     start_y = (SCREEN_HEIGHT - grid_h_px) // 2 + (SCREEN_HEIGHT * 0.05)
-    
+
     return start_x, start_y, tile_size
 
 def update_sidebar_buttons():
@@ -134,7 +162,7 @@ def update_sidebar_buttons():
     start_x = (SIDEBAR_WIDTH - btn_size) // 2
     start_y = int(SCREEN_HEIGHT * 0.25)
     gap = int(btn_size * 1.2)
-    
+
     sidebar_buttons = {
         Direction.NORTH: pygame.Rect(start_x, start_y, btn_size, btn_size),
         Direction.EAST:  pygame.Rect(start_x, start_y + gap, btn_size, btn_size),
@@ -187,14 +215,14 @@ def place_tile(direction, coords):
 
 def handle_events():
     global running, selected_direction
-    
+
     # Ensure button rects are up to date
     update_sidebar_buttons()
-    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        
+
         if game_state == GameState.SIMULATION and game_phase == GamePhase.PLACING_TILES:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = pygame.mouse.get_pos()
@@ -272,23 +300,8 @@ def apply_crt_effect(screen, intensity=6, pixelation=8):
         if random.random() < static_chance:
             pygame.draw.line(static_surface, (255, 255, 255, random.randint(30, 80)), (0, y), (width, y))
     glitch_surface_arr = pygame.surfarray.pixels3d(glitch_surface).copy()
-    distorted = np.zeros_like(glitch_surface_arr)
-    cx, cy = width / 2, height / 2
-    for y in range(height):
-        for x in range(width):
-            # normalized coords (-1 to 1)
-            nx = (x - cx) / cx
-            ny = (y - cy) / cy
-            r = math.sqrt(nx * nx + ny * ny)
-            # barrel distortion factor
-            k = 0.1
-            nr = r * (1 + k * (r ** 2))
-            if nr == 0:
-                continue
-            tx = int(cx + nx / r * nr * cx)
-            ty = int(cy + ny / r * nr * cy)
-            if 0 <= tx < width and 0 <= ty < height:
-                distorted[x, y] = glitch_surface_arr[tx, ty]
+
+    distorted = glitch_surface_arr[XS, YS]
     glitch_surface = pygame.surfarray.make_surface(distorted)
     screen.blit(glitch_surface, (0, 0))
     pygame.display.flip()
@@ -298,6 +311,7 @@ def draw_lobby():
     font = pygame.font.SysFont(FONTNAME, 55)
     text = font.render("Lobby - Waiting for everyone to join...", True, WHITE)
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
+    apply_crt_effect(screen)
 
 
 def draw_sidebar():
@@ -315,25 +329,31 @@ def draw_sidebar():
         if selected_direction == direction:
             pygame.draw.rect(screen, (255, 215, 0), rect.inflate(6, 6), 3)
         
-        # Button Box
+        # Draw Button Box
         pygame.draw.rect(screen, (70, 70, 70), rect)
         pygame.draw.rect(screen, (200, 200, 200), rect, 2)
 
-        # Icon
+        # Draw Arrow Icon (Simulated text or image)
+        # In real usage, rotate the arrow image:
         try:
             arrow_img = pygame.image.load(os.path.join("Assets", "Tile_Arrow.png"))
+            # Rotate based on direction value (1=North=0deg, 2=East=-90deg, etc)
+            # Adjust rotation logic to match your Enum values
             angle = (direction.value - 1) * -90 
             scaled_icon = pygame.transform.scale(arrow_img, (int(rect.width * 0.8), int(rect.height * 0.8)))
             icon = pygame.transform.rotate(scaled_icon, angle)
             icon_rect = icon.get_rect(center=rect.center)
             screen.blit(icon, icon_rect)
         except:
+            # Fallback Text
             txt = GAME_FONT.render(direction.name[0], True, WHITE)
             txt_rect = txt.get_rect(center=rect.center)
             screen.blit(txt, txt_rect)
 
 def draw_simulation():
     screen.fill(BLACK)
+    
+    # 1. Draw Sidebar UI first
     draw_sidebar()
 
     # Metrics for scaling
@@ -356,13 +376,13 @@ def draw_simulation():
         for j in range(grid_len):
             x_pos = start_x + i * tile_size
             y_pos = start_y + j * tile_size
-            
+
             # Layer 0: Background
             screen.blit(bg_tile, (x_pos, y_pos))
 
             # Layer 1: Objects
             tile = tile_grid[j][i]
-            
+
             if isinstance(tile, Tile):
                 if tile.direction != Direction.STILL:
                     angle = (tile.direction.value - 1) * -90
@@ -391,7 +411,7 @@ def draw_simulation():
         # Center text in available space
         avail_w = SCREEN_WIDTH - SIDEBAR_WIDTH
         center_x = SIDEBAR_WIDTH + avail_w // 2
-        
+
         screen.blit(title, (center_x - title.get_width()//2, 20))
         screen.blit(sub, (center_x - sub.get_width()//2, 80))
             

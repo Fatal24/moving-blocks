@@ -240,14 +240,8 @@ def handle_events():
 
         if game_state == GameState.SIMULATION and game_phase == GamePhase.PLACING_TILES:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # Apply CRT Distortion inverse logic if possible, or just use raw pos if CRT is visual only
-                # For accurate clicking with heavy CRT distortion, you'd need an inverse map.
-                # Assuming simple mapping for now:
                 raw_mx, raw_my = pygame.mouse.get_pos()
-                try:
-                    mx, my = int(XS[raw_mx, raw_my]), int(YS[raw_mx, raw_my])
-                except:
-                    mx, my = raw_mx, raw_my
+                mx, my = int(XS[raw_mx, raw_my]), int(YS[raw_mx, raw_my])
 
                 # A. Check Sidebar Clicks
                 for direction, rect in sidebar_buttons.items():
@@ -273,22 +267,60 @@ def update():
     pass
 
 def apply_crt_effect(screen, intensity=6, pixelation=8):
-    # (CRT Code omitted for brevity - same as your previous code)
-    # Just copying the minimal logic to make it run
     width, height = screen.get_size()
     glitch_surface = screen.copy()
+
     scanline_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+
     for y in range(0, height, max(1, 8-intensity)):
         pygame.draw.line(scanline_surface, (0, 0, 0, 60), (0, y), (width, y))
+
     screen.blit(scanline_surface, (0, 0))
-    
-    # Distortion
-    if len(XS) > 0: # Ensure precompute ran
-        glitch_surface_arr = pygame.surfarray.pixels3d(glitch_surface).copy()
-        distorted = glitch_surface_arr[XS, YS]
-        glitch_surface = pygame.surfarray.make_surface(distorted)
-        screen.blit(glitch_surface, (0, 0))
+
+    small_surf = pygame.transform.scale(screen, (width // pixelation, height // pixelation))
+    screen.blit(pygame.transform.scale(small_surf, (width, height)), (0, 0))
+
+    if random.randint(0, 15) == 0:
+        flicker_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+        flicker_surface.fill((255, 255, 255, 5))
+        screen.blit(flicker_surface, (0, 0))
+
+    glow_surf = pygame.transform.smoothscale(screen, (width // 2, height // 2))
+    glow_surf = pygame.transform.smoothscale(glow_surf, (width, height))
+    glow_surf.set_alpha(100)
+    screen.blit(glow_surf, (0, 0))
+
+    shift_amount = intensity*10
+    if random.random() < 0.2:
+        y_start = random.randint(0, height - 20)
+        slice_height = random.randint(5, 20)
+        offset = random.randint(-shift_amount, shift_amount)
+
+        slice_area = pygame.Rect(0, y_start, width, slice_height)
+        slice_copy = glitch_surface.subsurface(slice_area).copy()
+        glitch_surface.blit(slice_copy, (offset, y_start))
+
+    color_shift = intensity*2
+    if random.random() < 0.1:
+        for i in range(3):
+            x_offset = random.randint(-color_shift, color_shift)
+            y_offset = random.randint(-color_shift, color_shift)
+
+            shifted = glitch_surface.copy()
+            screen.blit(shifted, (x_offset, y_offset), special_flags=pygame.BLEND_ADD)
+
+    static_chance = intensity/8
+    static_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+
+    for y in range(0, height, 8):
+        if random.random() < static_chance:
+            pygame.draw.line(static_surface, (255, 255, 255, random.randint(30, 80)), (0, y), (width, y))
+    glitch_surface_arr = pygame.surfarray.pixels3d(glitch_surface).copy()
+    distorted = glitch_surface_arr[XS, YS]
+    glitch_surface = pygame.surfarray.make_surface(distorted)
+    screen.blit(glitch_surface, (0, 0))
     pygame.display.flip()
+
 
 def draw_lobby():
     font = pygame.font.SysFont(FONTNAME, 55)
@@ -446,16 +478,17 @@ def draw_game_over():
     screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 + text.get_height() // 2 + 40))
 
 def draw():
-    screen.fill((0, 0, 0))
+    screen.fill(BLACK)
 
     if game_state == GameState.LOBBY:
         draw_lobby()
     elif game_state == GameState.SIMULATION:
         draw_simulation()
+        apply_crt_effect(screen)
     elif game_state == GameState.GAME_OVER:
         draw_game_over()
 
-    apply_crt_effect(screen)
+
 
 # REMOVE LATER - Mock setup for testing
 #game = backend_game.Game([], seed=random.randint(0, 2**32 - 1))

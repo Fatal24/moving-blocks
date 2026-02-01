@@ -72,7 +72,7 @@ started = False
 # Main loop
 
 tile_placements = []
-number_of_players = 2
+number_of_players = 1
 
 
 

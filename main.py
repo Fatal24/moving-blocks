@@ -265,7 +265,9 @@ def handle_events():
 
 def update():
     global game_phase, animation_frame
+
     if game_phase == GamePhase.MOVING_BOXES:
+        game.move_boxes()
         if animation_frame < TOTAL_ANIMATION_FRAMES:
             animation_frame += 1
         else:
@@ -398,7 +400,7 @@ def draw_box_handled(start_x, start_y, tile_size):
     # Assuming this function is called inside the main loop and you want to see the animation:
     # We will simulate the loop here for demonstration as requested "call handler n times".
     
-    steps = 10
+    steps = 1
     for k in range(1, steps + 1):
         # Clear screen or redraw background here if you want smooth animation 
         # (Otherwise it trails). For this snippet, we just blit on top.
@@ -418,8 +420,7 @@ def draw_box_handled(start_x, start_y, tile_size):
             scaled_box = pygame.transform.scale(box_raw, (int(w), int(h)))
             screen.blit(scaled_box, (dx, dy))
         
-        pygame.display.flip()
-        pygame.time.delay(30) # Small delay to see the animation
+        pygame.time.delay(1) # Small delay to see the animation
 
 def draw_lobby():
     font = pygame.font.SysFont(FONTNAME, 55)
@@ -646,7 +647,10 @@ while running:
                 #if type(temp_tile) == backend_helper.Tile:
                 temp_tile.direction = x["direction"]
 
-            game_phase = GamePhase.MOVING_BOXES 
+            game_phase = GamePhase.MOVING_BOXES
+            
+            tiles_placed_count = 0
+            animation_frame = 0
             print("DOING SHIT")
 
         else: 
@@ -657,6 +661,9 @@ while running:
 
     handle_events()
     update()
+    if game:
+        print(game.animation_boxes)
+        print(game.boxes)
     draw()
 
     while send:

@@ -24,6 +24,12 @@ class Direction(Enum):
         if other.value == 0 or self.value - other.value > 0:
             return self.value - other.value
         return Direction((self.value - other.value - 1) % 5)
+    
+    def rot90(self):
+        transforms = {Direction.NORTH: Direction.EAST,
+                      Direction.EAST: Direction.SOUTH, Direction.SOUTH: Direction.WEST,
+                      Direction.WEST: Direction.NORTH, Direction.STILL: Direction.STILL}
+        return transforms[self]
 
 class Box:
     def __init__(self, coords, direction, date):
@@ -89,7 +95,7 @@ class Spawner:
         self.spawn_epoch += 1
 
         if force_spawn or self.spawn_epoch == self.epoch_threshold:
-            self.direction = self.direction + Direction.NORTH
+            #self.direction = self.direction.rot90()
             self.spawn_epoch = 0
             return Box(self.coords, self.direction, self.date)
 	

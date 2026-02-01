@@ -44,17 +44,17 @@ class Game:
 
                 match x.direction:
                     case Direction.NORTH:
-                        temp_coords[1] = (temp_coords[1] - 1) % len(self.game)
+                        temp_coords = (temp_coords[0], (temp_coords[1] - 1) % len(self.game))
                     case Direction.SOUTH:
-                        temp_coords[1] = (temp_coords[1] + 1) % len(self.game)
+                        temp_coords = (temp_coords[0], (temp_coords[1] + 1) % len(self.game))
                     case Direction.EAST:
-                        temp_coords[0] = (temp_coords[0] + 1) % len(self.game)
+                        temp_coords = ((temp_coords[0] + 1) % len(self.game), temp_coords[1])
                     case Direction.WEST:
-                        temp_coords[0] = (temp_coords[0] - 1) % len(self.game)
+                        temp_coords = ((temp_coords[0] - 1) % len(self.game), temp_coords[1])
                 
                 conflict = False
 
-                for idy, y in enumerate(temp):
+                for idy, y in enumerate(temp[:-1]):
                     if temp_coords == y.coords:
                         conflict = True
                         temp_animation.append((x.coords,Direction.STILL))
@@ -64,11 +64,14 @@ class Game:
                     x.coords = temp_coords
                     if type(self.game[x.coords[1]][x.coords[0]]) == Goal:
                         self.scores[self.game[x.coords[1]][x.coords[0]].player - 1] += 1
-                        
-                    elif self.game[x.coords[1]][x.coords[0]].direction != Direction.STILL and self.game[x.coords[1]][x.coords[0]] != x.direction:
+                    
+                    
+                    else:
                         temp_animation.append((x.coords,x.direction))
-                        x.direction = self.game[x.coords[1]][x.coords[0]]
-                        temp.append(x)
+                        if self.game[x.coords[1]][x.coords[0]].direction != Direction.STILL and self.game[x.coords[1]][x.coords[0]] != x.direction:
+                            x.direction = self.game[x.coords[1]][x.coords[0]].direction 
+                            temp.append(x)
+
 
             self.old = self.boxes
             self.boxes = deepcopy(temp)

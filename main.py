@@ -649,8 +649,8 @@ while running:
             game_phase = GamePhase.MOVING_BOXES
             for i in range(game.num_moves):
                 game.move_boxes()
-                draw_simulation()
-                time.sleep(0.5)
+                draw()
+                time.sleep(1)
 
             tiles_placed_count = 0
             animation_frame = 0

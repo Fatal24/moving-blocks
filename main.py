@@ -20,6 +20,7 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption("Clash of Tiles (this is why we clash)")
+pygame.display.set_icon(pygame.image.load(os.path.join("Assets","Tile_Arrow.png")))
 
 # --- CONFIGURATION ---
 WINNINGSCORE = 3

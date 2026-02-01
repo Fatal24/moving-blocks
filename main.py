@@ -22,6 +22,7 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("Moving Blocks")
 
 # --- CONFIGURATION ---
+WINNINGSCORE = 3
 SIDEBAR_WIDTH = 200      # Left side (Tools)
 SCOREBOARD_WIDTH = 200   # Right side (Scores)
 TILES_PER_TURN = 1       # Limit how many tiles a player can place
@@ -483,6 +484,9 @@ def draw_scoreboard():
             # i+1 is Player ID
             p_text = f"P{i+1}:"
             s_text = f"{score}"
+            if score == WINNINGSCORE:
+                global running
+                running = False
             
             y_pos = 300 + (i * 60)
             
@@ -491,6 +495,8 @@ def draw_scoreboard():
             if i + 1 == player_number: 
                 color = (100, 255, 100) # Green for self
                 p_text += " (You)"
+                global victory
+                victory = True
 
             # Render Player Name
             name_surf = GAME_FONT.render(p_text, True, color)

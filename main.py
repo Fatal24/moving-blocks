@@ -379,8 +379,8 @@ def handle_box_animation(k, n, x_pos, y_pos, direction, tile_size):
 
 def draw_box_handled(start_x, start_y, tile_size):
     """
-    Draws the boxes from game.animated_boxes.
-    Assumes 'game.animated_boxes' contains [[col, row], direction]
+    Draws the boxes from game.animation_boxes.
+    Assumes 'game.animation_boxes' contains [[col, row], direction]
     """
     # 1. Prepare Box Image (Load once)
     try:
@@ -403,7 +403,7 @@ def draw_box_handled(start_x, start_y, tile_size):
         # Clear screen or redraw background here if you want smooth animation 
         # (Otherwise it trails). For this snippet, we just blit on top.
         
-        for box in game.animated_boxes:
+        for box in game.animation_boxes:
             coords = box[0]      # [col, row]
             direction = box[1]   # Direction Enum
             
